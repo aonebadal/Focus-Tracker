@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Sessions | Focus Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <h1>Focus Tracker</h1>
+            </div>
+            <a href="/" class="btn-secondary">Back to Dashboard</a>
+        </div>
+    </header>
+
+    <section class="previous-page">
+        <div class="container">
+            <div class="previous-header">
+                <h1>Previous Focus Sessions</h1>
+            </div>
+
+            <div class="previous-grid">
+                <article class="previous-panel sessions-panel">
+                    <h2>Completed Sessions</h2>
+                    <p class="subtext previous-intro">
+                        Only valid completed sessions are listed (start time, end time, duration greater than 0, and focus score).
+                    </p>
+                    <div class="sessions-table-wrap">
+                        <table class="sessions-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                    <th>Focus Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sessionsBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="sessionsEmpty" class="empty-block" style="display:none;">No completed sessions found yet.</div>
+                </article>
+
+                <article class="previous-panel stats-panel">
+                    <h2>Trend Stats</h2>
+                    <div class="stats-cards">
+                        <div class="stat-card">
+                            <p>Total Sessions</p>
+                            <strong id="statTotalSessions">0</strong>
+                        </div>
+                        <div class="stat-card">
+                            <p>Average Score</p>
+                            <strong id="statAvgScore">0%</strong>
+                        </div>
+                        <div class="stat-card">
+                            <p>Best Score</p>
+                            <strong id="statBestScore">-</strong>
+                        </div>
+                        <div class="stat-card">
+                            <p>Improvement</p>
+                            <strong id="statImprovement">0</strong>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="previous-panel trend-panel">
+                    <h2>Session Trend & Delta Graph</h2>
+                    <div class="trend-meta">
+                        <span>X-axis: Session Date</span>
+                        <span>Y-axis (left): Focus Score</span>
+                        <span>Y-axis (right): Session Difference</span>
+                    </div>
+                    <div class="trend-shell">
+                        <canvas id="trendChart"></canvas>
+                        <div id="trendEmpty" class="trend-empty">No trend graph data available yet.</div>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const initialSessions = {{ sessions | tojson | safe }};
+        const initialTrend = {{ trend | tojson | safe }};
+        let trendChart = null;
+
+        function normalizeSessions(input) {
+            if (!Array.isArray(input)) {
+                return [];
+            }
+            return input.filter((x) => x && typeof x === "object");
+        }
+
+        function buildTrendFromSessions(sessions) {
+            const ordered = [...sessions].sort((a, b) => {
+                const at = new Date(a.start_time || 0).getTime();
+                const bt = new Date(b.start_time || 0).getTime();
+                return at - bt;
+            });
+
+            const result = [];
+            let prev = null;
+            ordered.forEach((session, idx) => {
+                const score = Number(session.average_focus || 0);
+                result.push({
+                    session_index: idx + 1,
+                    date_label: session.date_label || session.start_time || `Session ${idx + 1}`,
+                    score,
+                    delta: prev === null ? 0 : score - prev,
+                });
+                prev = score;
+            });
+            return result;
+        }
+
+        function normalizeTrend(trend, sessions) {
+            if (Array.isArray(trend) && trend.length > 0) {
+                return trend;
+            }
+            return buildTrendFromSessions(sessions);
+        }
+
+        function renderSessionsTable(sessions) {
+            const body = document.getElementById("sessionsBody");
+            const empty = document.getElementById("sessionsEmpty");
+            if (!body || !empty) return;
+
+            body.innerHTML = "";
+            if (!sessions.length) {
+                empty.style.display = "block";
+                return;
+            }
+            empty.style.display = "none";
+
+            sessions.forEach((session) => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${session.date_label || session.start_time || "-"}</td>
+                    <td>${session.duration_label || "-"}</td>
+                    <td class="score">${Number(session.average_focus || 0)}</td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function renderStats(trendRows) {
+            const total = trendRows.length;
+            const scores = trendRows.map((x) => Number(x.score || 0));
+            const avg = total ? Math.round(scores.reduce((a, b) => a + b, 0) / total) : 0;
+            const best = total ? Math.max(...scores) : 0;
+            const improvement = total > 1 ? Math.round(scores[scores.length - 1] - scores[0]) : 0;
+
+            document.getElementById("statTotalSessions").textContent = String(total);
+            document.getElementById("statAvgScore").textContent = `${avg}%`;
+            document.getElementById("statBestScore").textContent = total ? `${best}%` : "-";
+            document.getElementById("statImprovement").textContent = improvement >= 0 ? `+${improvement}` : `${improvement}`;
+        }
+
+        function renderTrendChart(trendRows) {
+            const empty = document.getElementById("trendEmpty");
+            const canvas = document.getElementById("trendChart");
+            if (!canvas || !empty) return;
+
+            const labels = trendRows.map((x) => x.date_label);
+            const scores = trendRows.map((x) => Number(x.score || 0));
+            const deltas = trendRows.map((x) => Number(x.delta || 0));
+
+            empty.style.display = labels.length ? "none" : "flex";
+
+            const deltaColors = deltas.map((v) => (v >= 0 ? "rgba(16,185,129,0.55)" : "rgba(220,38,38,0.55)"));
+            const pointColors = scores.map((v) => (v > 70 ? "#22c55e" : v > 40 ? "#f59e0b" : "#dc2626"));
+
+            const config = {
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            type: "line",
+                            label: "Focus Score",
+                            data: scores,
+                            yAxisID: "y",
+                            borderColor: "#0f766e",
+                            backgroundColor: "rgba(15,118,110,0.10)",
+                            borderWidth: 3,
+                            tension: 0.35,
+                            pointRadius: 4,
+                            pointBackgroundColor: pointColors,
+                            fill: true,
+                        },
+                        {
+                            type: "bar",
+                            label: "Score Difference",
+                            data: deltas,
+                            yAxisID: "y1",
+                            backgroundColor: deltaColors,
+                            borderColor: deltaColors,
+                            borderWidth: 1,
+                            borderRadius: 6,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: "#0f172a", font: { weight: "600" } },
+                        },
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: "#475569" },
+                            grid: { color: "rgba(15,23,42,0.10)" },
+                        },
+                        y: {
+                            position: "left",
+                            min: 0,
+                            max: 100,
+                            ticks: { color: "#475569" },
+                            grid: { color: "rgba(15,23,42,0.10)" },
+                            title: { display: true, text: "Focus Score", color: "#475569" },
+                        },
+                        y1: {
+                            position: "right",
+                            ticks: { color: "#475569" },
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: "Difference", color: "#475569" },
+                        },
+                    },
+                },
+            };
+
+            if (trendChart) {
+                trendChart.destroy();
+            }
+            trendChart = new Chart(canvas, config);
+        }
+
+        async function loadPreviousData() {
+            let sessions = normalizeSessions(initialSessions);
+            let trend = normalizeTrend(initialTrend, sessions);
+
+            try {
+                const response = await fetch("/api/previous", { cache: "no-store" });
+                if (response.ok) {
+                    const data = await response.json();
+                    sessions = normalizeSessions(data.sessions || sessions);
+                    trend = normalizeTrend(data.trend || [], sessions);
+                }
+            } catch (error) {
+                // fallback to server-rendered data
+            }
+
+            renderSessionsTable(sessions);
+            renderStats(trend);
+            renderTrendChart(trend);
+        }
+
+        loadPreviousData();
+    </script>
+</body>
+
+</html>

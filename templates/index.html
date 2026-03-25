@@ -1,0 +1,320 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Focus Tracker | Smart Productivity</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+  <header class="navbar">
+    <div class="container nav-content">
+      <div class="logo">
+        <h1>Focus Tracker</h1>
+      </div>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">Menu</button>
+      <nav class="nav-links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="/improve">Improve Focus</a>
+        <a href="#stats">Dashboard</a>
+        <a href="#contact">Contact</a>
+        <a href="/previous">Previous</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero-section" id="home">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="hero-tag">Smart Study Assistant</p>
+        <h1>Stay Focused. Achieve More.</h1>
+        <h2>Track your productivity and improve focus with smart insights.</h2>
+        <p>
+          Focus Tracker helps you build concentration habits using Pomodoro sessions, breathing exercises, and
+          mindfulness practices.
+        </p>
+        <div class="hero-actions">
+          <a class="btn-primary" href="#stats">Start Focusing</a>
+          <a class="btn-secondary" href="/improve">Explore Techniques</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="{{ url_for('static', filename='images/focus_uploaded_2.jpg') }}" alt="Focused learner using deep concentration techniques" loading="eager" />
+      </div>
+    </div>
+  </section>
+
+  <section id="about" class="about-section">
+    <div class="container">
+      <div class="about-intro">
+        <h2>About Focus Tracker</h2>
+        <p class="subtext">
+          A modern productivity system to improve concentration, reduce distractions, and build deep-work habits.
+        </p>
+      </div>
+      <div class="about-showcase">
+        <div class="about-showcase-media">
+          <img src="{{ url_for('static', filename='images/focus_uploaded_1.jpg') }}" alt="Creative thinking and concentration mindset visualization" loading="lazy" />
+        </div>
+        <div class="about-showcase-copy">
+          <h3>Built For Consistent Deep Work</h3>
+          <p>
+            Focus Tracker combines real-time focus detection, session analytics, and guided productivity methods to help you
+            study with clarity and consistency.
+          </p>
+          <div class="about-showcase-points">
+            <span>Live Focus Monitoring</span>
+            <span>Pomodoro + Stopwatch</span>
+            <span>AI Study Assistant</span>
+          </div>
+        </div>
+      </div>
+      <div class="about-cards">
+        <article class="about-card">
+          <div class="about-icon">FT</div>
+          <h3>Focus Tracking</h3>
+          <p>Monitor live focus score, session quality, and distraction moments while you study.</p>
+        </article>
+        <article class="about-card">
+          <div class="about-icon">SA</div>
+          <h3>Smart Analytics</h3>
+          <p>Analyze trends, best sessions, and focus patterns to improve your daily consistency.</p>
+        </article>
+        <article class="about-card">
+          <div class="about-icon">VT</div>
+          <h3>AI Tutor (Vision)</h3>
+          <p>Ask questions, summarize notes, and get practical study guidance based on your focus context.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="stats">
+    <div class="container">
+      <h2>NeuroFocus Command Dashboard</h2>
+      <p class="subtext">Real-time focus stream and environment state</p>
+
+      <div class="dashboard-grid">
+        <div class="panel user-panel">
+          <div class="user-card-head">
+            <div class="user-avatar">U</div>
+            <div>
+              <h3>Welcome, User 👋</h3>
+              <p>One focused hour today can outperform a distracted full day.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel gauge-panel">
+          <h3>Focus Gauge</h3>
+          <div class="gauge-wrap">
+            <div id="focusGauge" class="focus-gauge">
+              <div class="gauge-center">
+                <span id="focusValue">0</span>
+                <small>/100</small>
+              </div>
+            </div>
+          </div>
+          <div class="focus-progress">
+            <div class="focus-progress-track">
+              <div id="focusProgressFill" class="focus-progress-fill"></div>
+            </div>
+          </div>
+          <div class="prediction-box">
+            <div>Predicted (10s): <strong id="predictedValue">0</strong></div>
+            <div id="predictionStatus" class="prediction-status">Stable trend</div>
+          </div>
+        </div>
+
+        <div class="panel status-panel">
+          <h3>Environment Status</h3>
+          <div class="status-line"><span>Mode</span><strong id="envMode">idle</strong></div>
+          <div class="status-line"><span>Light</span><strong id="lightColor">off</strong></div>
+          <div class="status-line"><span>Fan</span><strong id="fanSpeed">off</strong></div>
+          <div class="status-line"><span>Music</span><strong id="musicState">off</strong></div>
+          <div class="status-line"><span>Brainwave</span><strong id="brainwaveWave">delta</strong></div>
+          <div class="status-line"><span>Beat Hz</span><strong id="brainwaveBeat">2 Hz</strong></div>
+          <div class="status-line"><span>Carrier Hz</span><strong id="brainwaveCarrier">180 Hz</strong></div>
+          <button id="brainwaveToggle" class="btn-secondary brainwave-toggle">Disable Brainwave Audio</button>
+        </div>
+
+        <div class="panel chart-panel chart-large">
+          <h3>Focus History (1s stream)</h3>
+          <div class="chart-shell">
+            <canvas id="focusChart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel chart-panel">
+          <h3>Focus Distribution</h3>
+          <div class="chart-shell">
+            <canvas id="distributionChart"></canvas>
+          </div>
+        </div>
+
+        <div class="panel analytics-panel">
+          <h3>AI Insights</h3>
+          <div class="analytics-grid">
+            <div class="metric">
+              <span>Average Focus</span>
+              <strong id="avgFocus">0%</strong>
+            </div>
+            <div class="metric">
+              <span>Best Session</span>
+              <strong id="bestSession">-</strong>
+            </div>
+            <div class="metric">
+              <span>Worst Session</span>
+              <strong id="worstSession">-</strong>
+            </div>
+            <div class="metric">
+              <span>Distraction Rate</span>
+              <strong id="distractionFreq">0/min</strong>
+            </div>
+            <div class="metric">
+              <span>Camera FPS</span>
+              <strong id="cameraFps">0 fps</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="center controls-row">
+        <select id="subjectSelect" class="subject-select" aria-label="Select subject for Pomodoro">
+          <option>Programming</option>
+          <option>Mathematics</option>
+          <option>Physics</option>
+          <option>Chemistry</option>
+          <option>Computer Science</option>
+          <option>General Study Help</option>
+        </select>
+        <button id="startBtn" class="btn-primary">Start Tracking</button>
+        <button id="stopBtn" class="btn-secondary">Stop Tracking</button>
+        <button id="pomodoroBtn" class="btn-secondary">Start Pomodoro</button>
+        <button class="btn-secondary" onclick="location.href='/previous'">Previous Sessions</button>
+      </div>
+
+      <div class="pomodoro-widget">
+        <div class="pomodoro-card">
+          <h3>Pomodoro Timer</h3>
+          <div id="pomodoroCountdown" class="pomodoro-time">25:00</div>
+          <div class="pomodoro-actions">
+            <button id="pomodoroToggleBtn" class="btn-secondary" type="button">Start Timer</button>
+            <button id="pomodoroResetBtn" class="btn-secondary" type="button">Reset</button>
+          </div>
+          <p id="pomodoroStatus" class="pomodoro-status">Ready for a 25-minute deep work block.</p>
+        </div>
+        <div class="pomodoro-card">
+          <h3>Session Stopwatch</h3>
+          <div id="pomodoroStopwatch" class="pomodoro-time">00:00</div>
+          <div class="pomodoro-actions">
+            <button id="stopwatchToggleBtn" class="btn-secondary" type="button">Start Stopwatch</button>
+            <button id="stopwatchResetBtn" class="btn-secondary" type="button">Reset</button>
+          </div>
+          <p class="pomodoro-status">Track your effective study duration.</p>
+        </div>
+      </div>
+
+      <div id="notice" class="center notice"></div>
+
+      <div class="camera-bootstrap">
+        <video id="webcamPreview" autoplay playsinline muted></video>
+        <div id="cameraStatus" class="camera-status">Initializing webcam...</div>
+      </div>
+
+      <audio id="alertSound" src="{{ url_for('static', filename='alert.mp3') }}"></audio>
+      <audio id="adaptiveMusic" loop></audio>
+    </div>
+  </section>
+
+  <section id="vision" class="vision-container">
+    <div class="container">
+      <div class="vision-header">
+        <h2 class="vision-title">Vision AI Tutor</h2>
+        <p class="vision-subtitle">Your Smart Study Assistant</p>
+      </div>
+
+      <div class="vision-shell">
+        <div id="visionChat" class="vision-chat" aria-live="polite" aria-label="Vision chat messages"></div>
+        <div id="visionLoading" class="vision-loading" hidden>Vision is thinking...</div>
+
+        <div class="vision-tools">
+          <div class="vision-field">
+            <label for="visionSubject">Subject</label>
+            <select id="visionSubject">
+              <option value="Programming">Programming</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Physics">Physics</option>
+              <option value="Chemistry">Chemistry</option>
+              <option value="Computer Science">Computer Science</option>
+              <option value="General Study Help" selected>General Study Help</option>
+            </select>
+          </div>
+          <div class="vision-field">
+            <label for="visionStudyTime">Study Time</label>
+            <input id="visionStudyTime" type="text" placeholder="e.g. 2 hours today" />
+          </div>
+        </div>
+
+        <div class="vision-actions">
+          <button class="vision-btn vision-btn-action" id="visionPlanBtn" type="button">Make Study Plan</button>
+          <button class="vision-btn vision-btn-action" id="visionSummarizeBtn" type="button">Summarize</button>
+          <button class="vision-btn vision-btn-action" id="visionFocusBtn" type="button">Focus Help</button>
+          <label class="vision-btn vision-btn-upload" for="visionFileInput">Upload File</label>
+          <input id="visionFileInput" type="file" accept=".pdf,.txt,.md" hidden />
+          <button class="vision-btn vision-btn-action" id="visionUploadSummarizeBtn" type="button">Summarize File</button>
+          <button class="vision-btn vision-btn-clear" id="visionClearBtn" type="button">Clear Chat</button>
+        </div>
+        <p id="visionFileMeta" class="vision-file-meta">No file selected.</p>
+
+        <div class="vision-input-wrap">
+          <textarea id="visionInput" class="vision-input" rows="4" placeholder="Ask anything... or paste text for summary."></textarea>
+          <button class="vision-btn vision-btn-send" id="visionSendBtn" type="button">Send</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <h2>Contact Team</h2>
+      <p id="contactGreeting" class="contact-greeting" aria-live="polite"></p>
+      <p class="contact-note">Feel free to reach out - we're here to help you stay focused and succeed!</p>
+      <div class="contact-cards">
+        <article class="contact-card">
+          <h3>Badal Kumar</h3>
+          <p>Lead Developer</p>
+          <a href="mailto:badal.kumar.cseiot.2024@miet.ac.in">badal.kumar.cseiot.2024@miet.ac.in</a>
+        </article>
+        <article class="contact-card">
+          <h3>Mayank Bharti</h3>
+          <p>Developer</p>
+          <a href="mailto:mayank.bharti.cseiot.2024@miet.ac.in">mayank.bharti.cseiot.2024@miet.ac.in</a>
+        </article>
+        <article class="contact-card">
+          <h3>Rajponia</h3>
+          <p>Developer</p>
+          <a href="mailto:rajponia.cseiot.2024@miet.ac.in">rajponia.cseiot.2024@miet.ac.in</a>
+        </article>
+      </div>
+      <div class="contact-phone">
+        <span>Phone:</span>
+        <a href="tel:+919389608703">+91 9389608703</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    window.ESP32_BASE_URL = {{ esp32_browser_url|tojson }};
+  </script>
+  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ui_enhancements.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/vision.js') }}"></script>
+</body>
+
+</html>
+

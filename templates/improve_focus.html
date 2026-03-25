@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Improve Focus | Focus Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <header class="navbar">
+        <div class="container nav-content">
+            <div class="logo">
+                <h1>Focus Tracker</h1>
+            </div>
+            <a href="/" class="btn-secondary">Back to Home</a>
+        </div>
+    </header>
+
+    <section class="improve-page">
+        <div class="container">
+            <div class="improve-page-hero">
+                <div class="improve-page-copy">
+                    <h2>Improve Focus Techniques</h2>
+                    <p class="subtext improve-page-subtext">Use these practical methods to build consistency, reduce distraction, and study with higher clarity.</p>
+                    <div class="hero-actions">
+                        <a class="btn-primary" href="/#stats">Go To Dashboard</a>
+                        <a class="btn-secondary" href="/#vision">Open AI Tutor</a>
+                    </div>
+                </div>
+                <div class="improve-page-media-grid">
+                    <div class="improve-page-media improve-page-media-tall">
+                        <img src="{{ url_for('static', filename='images/focus_uploaded_1.jpg') }}" alt="Focused professional mindset visual" loading="lazy">
+                    </div>
+                    <div class="improve-page-media">
+                        <img src="{{ url_for('static', filename='images/focus_uploaded_2.jpg') }}" alt="Focused planning and concentration workspace visual" loading="lazy">
+                    </div>
+                </div>
+            </div>
+
+            <div class="improve-highlight">
+                <div class="improve-highlight-copy">
+                    <h3>Small Habits, Strong Focus</h3>
+                    <p>Use these techniques daily to improve concentration, reduce mental fatigue, and keep your study sessions productive.</p>
+                </div>
+                <div class="improve-highlight-media">
+                    <img src="{{ url_for('static', filename='images/hero.jpg') }}" alt="Focused study and productivity scene" loading="lazy">
+                </div>
+            </div>
+            <div class="technique-grid">
+                <article class="technique-card">
+                    <img src="{{ url_for('static', filename='images/focus_technique_4.jpg') }}" alt="Pomodoro technique visual" loading="lazy">
+                    <h3>Pomodoro Technique</h3>
+                    <p>Work for 25 minutes with full concentration followed by a 5-minute break to maintain productivity and prevent burnout.</p>
+                </article>
+
+                <article class="technique-card">
+                    <img src="{{ url_for('static', filename='images/focus_technique_3.jpg') }}" alt="Deep breathing visual" loading="lazy">
+                    <h3>Deep Breathing</h3>
+                    <p>Deep breathing increases oxygen supply to the brain, reduces stress, and improves mental clarity.</p>
+                </article>
+
+                <article class="technique-card">
+                    <img src="{{ url_for('static', filename='images/focus_technique_1.jpg') }}" alt="Tratak meditation visual" loading="lazy">
+                    <h3>Tratak Meditation</h3>
+                    <p>Tratak is a yogic meditation technique where you focus on a single point to enhance concentration and inner awareness.</p>
+                </article>
+
+                <article class="technique-card">
+                    <img src="{{ url_for('static', filename='images/focus_technique_2.jpg') }}" alt="Mind reset visual" loading="lazy">
+                    <h3>Mind Reset</h3>
+                    <p>Taking mindful breaks helps refresh the brain and maintain sustained productivity.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+</body>
+
+</html>
